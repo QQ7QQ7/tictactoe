@@ -6,20 +6,20 @@ class PlayGrid:
         self.numColumns = numColumns
         self.numRows = numRows
         self.grid = [[None for x in range(self.numColumns)] for y in range(self.numRows)]
-        self.playerSymbols = {1: "X", 2: "O"}
+        self.playerSymbols = ["X", "O"]
         self.winningLength = 3
 
     def prettyPrint(self):
         # Kopfzeile
         headerString = "  "
         for columnNumber in range(self.numColumns):
-            headerString += str(columnNumber + 1) + "\t  "
+            headerString += str(columnNumber) + "\t  "
         print(headerString)
 
         # Spielfläche
         for x in range(self.numRows):
             # Zeileninhalt
-            rowAsString = str(x + 1)
+            rowAsString = str(x)
             for y in range(self.numColumns):
                 cellContent = self.grid[x][y]
                 if cellContent is None:
@@ -37,8 +37,16 @@ class PlayGrid:
             #    seperatorLine += "=="
             # print(seperatorLine)
 
-    def updateScore(self, playerNumber, x, y):
-        self.grid[x][y] = self.playerSymbols[playerNumber]
+    def getEmptyCells(self):
+        emptyCells = []
+        for y in range(self.numRows):
+            for x in range(self.numColumns):
+                if self.grid[x][y] is None:
+                    emptyCells.append([x,y])
+        return emptyCells
+
+    def updateScore(self, playerSymbol, x, y):
+        self.grid[x][y] = playerSymbol
 
     def isGameFinished(self):
         for row in range(self.numRows):
