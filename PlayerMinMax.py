@@ -1,5 +1,5 @@
 import copy
-from itertools import chain
+import random
 
 from PlayerInterface import PlayerInterface
 
@@ -11,6 +11,7 @@ class PlayerMinMax(PlayerInterface):
     def max(self, playGrid):
         currentPlayer = self.currentPlayer(playGrid)
         emtpyCellCooridnatesXY = playGrid.getEmptyCells()
+        random.shuffle(emtpyCellCooridnatesXY)
         possibleMoveScores = {}
         for xy in emtpyCellCooridnatesXY:
             gridCopy = copy.deepcopy(playGrid)
