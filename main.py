@@ -18,7 +18,7 @@ def init():
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     playGrid = init()
-    player1 = PlayerHuman()
+    player1 = PlayerMinMax()
     player2 = PlayerMinMax()
     endGame = False
     playGrid.prettyPrint()

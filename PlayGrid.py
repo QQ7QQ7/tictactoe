@@ -42,7 +42,7 @@ class PlayGrid:
         for y in range(self.numRows):
             for x in range(self.numColumns):
                 if self.grid[x][y] is None:
-                    emptyCells.append([x,y])
+                    emptyCells.append((x,y))
         return emptyCells
 
     def updateScore(self, playerSymbol, x, y):
