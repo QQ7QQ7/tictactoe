@@ -5,6 +5,7 @@
 from PlayGrid import PlayGrid
 from PlayerHuman import PlayerHuman
 from PlayerMinMax import PlayerMinMax
+from PlayerReinforcement import PlayerReenforcement
 
 
 def init():
@@ -18,7 +19,7 @@ def init():
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     playGrid = init()
-    player1 = PlayerMinMax()
+    player1 = PlayerReenforcement()
     player2 = PlayerMinMax()
     endGame = False
     playGrid.prettyPrint()

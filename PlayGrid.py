@@ -130,3 +130,15 @@ class PlayGrid:
         else:
             #Kein Gewinner, aber das Spielfeld ist komplett gefüllt
             return True, None
+
+    def getNextPlayer(self):
+        symbolsOnGridCount = {}
+        for playerSymbol in self.playerSymbols:
+            symbolsOnGridCount[playerSymbol] = [item for sublist in self.grid for item in sublist].count(playerSymbol)
+
+        if len(set(symbolsOnGridCount.values())) == 1:
+            # Gleich viele Symbole
+            return self.playerSymbols[0]
+        else:
+            # Mitten in der Runde, deshalb unterschiedlich viele Symbole je nach Spieler
+            return min(symbolsOnGridCount, key=symbolsOnGridCount.get)
