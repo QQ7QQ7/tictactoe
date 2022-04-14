@@ -142,3 +142,10 @@ class PlayGrid:
         else:
             # Mitten in der Runde, deshalb unterschiedlich viele Symbole je nach Spieler
             return min(symbolsOnGridCount, key=symbolsOnGridCount.get)
+
+    def __eq__(self, other):
+        if type(self) == type(other):
+            return self.grid == other.grid
+        else:
+            return False
+

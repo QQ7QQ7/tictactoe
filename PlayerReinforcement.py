@@ -3,16 +3,17 @@ from PlayerInterface import PlayerInterface
 import copy
 import pickle
 from os.path import exists
-from random import random
+import random
 class PlayerReenforcement(PlayerInterface):
-    winValue = 1
-    loseValue = -1
-    drawValue = 0
-    unknownValue = 0
+    winValue = 1.0
+    loseValue = -1.0
+    drawValue = 0.0
+    unknownValue = 0.0
     states = None
-    currentState = None
+    lastState = None
     stateFileName = 'states'
     explorationProbability = 0.2
+    stepSizeParameter = 0.1
 
     def makeMove(self, playGrid):
         if self.states is None:
@@ -21,7 +22,6 @@ class PlayerReenforcement(PlayerInterface):
                 with open(self.stateFileName, 'rb') as config_dictionary_file:
                     # Step 3
                     self.states = pickle.load(config_dictionary_file)
-                    self.states[2][0].prettyPrint()
             else:
                 self.createStates(playGrid)
                 # Step 2
@@ -29,18 +29,28 @@ class PlayerReenforcement(PlayerInterface):
                     # Step 3
                     pickle.dump(self.states, config_dictionary_file)
             #Aktuellen Zustand in States finden
-            self.currentState = [item for item in self.states if item[0] == playGrid][0]
+            self.lastState = [item for item in self.states if item[0] == playGrid][0]
+        else:
+            self.updateScore(playGrid)
+            #Last State aktualisieren, da ja der Gegner den letzten Zug gemacht hat
+            self.lastState = [item for item in self.lastState[2] if item[0] == playGrid][0]
 
-        #TODO UPDATE SCORE
-
-        if random() <= self.explorationProbability:
+        if random.random() <= self.explorationProbability:
             #Explore
-            self.currentState = self.determineExplorationMove()
+            self.lastState = self.determinExplorationMove()
         else:
             #Greedy
-            self.currentState = self.determinGreedyMove()
+            self.lastState = self.determinGreedyMove()
 
-        return self.getIndexOfDifference(playGrid, self.currentState)
+        return self.getIndexOfDifference(playGrid, self.lastState[0])
+
+    def updateScore(self, playGrid):
+        playGridState = [item for item in self.lastState[2] if item[0] == playGrid][0]
+        playGridStateValue = playGridState[1]
+        currentStateValue = self.lastState[1]
+        newStateValue = currentStateValue + self.stepSizeParameter * (playGridStateValue - currentStateValue)
+        self.lastState[1] = newStateValue
+
 
     def getIndexOfDifference(self, gridBeforeMove, gridAfterMove):
         for x in range(gridBeforeMove.numRows):
@@ -49,14 +59,15 @@ class PlayerReenforcement(PlayerInterface):
                     return x, y
 
     def determinGreedyMove(self):
+        maxValueOfFollowStates = max(self.lastState[2], key=lambda item: item[1])[1]
         #Alle Folgezustände die den größten Value haben
-        possibleFollowStates = max(self.currentState[2], key=lambda item: item[1])
+        possibleFollowStates = [item for item in self.lastState[2] if item[1] == maxValueOfFollowStates]
         followState = random.choice(possibleFollowStates)
         return followState
 
     def determinExplorationMove(self):
         #Alle Folgezustände die den größten Value haben
-        possibleFollowStates = self.currentState[2]
+        possibleFollowStates = self.lastState[2]
         followState = random.choice(possibleFollowStates)
         return followState
 
@@ -68,16 +79,16 @@ class PlayerReenforcement(PlayerInterface):
         #SubStates (ein Feld ist schon befüllt)
         self.states.extend(subStates)
         #Leeres Feld mit Value und Substates
-        self.states.append((emptyGrid, self.unknownValue, subStates))
+        self.states.append([emptyGrid, self.unknownValue, subStates])
 
     def createSubStates(self, currentGrid, playGrid):
         newSubStates = []
-        playerSymbol = currentGrid.getNextPlayer()
+        subStatePlayerSymbol = currentGrid.getNextPlayer()
         for x in range(playGrid.numRows):
             for y in range(playGrid.numColumns):
                 if currentGrid.grid[x][y] == None:
                     newSubGrid = copy.deepcopy(currentGrid)
-                    newSubGrid.grid[x][y] = playerSymbol
+                    newSubGrid.grid[x][y] = subStatePlayerSymbol
                     subSubStates = None
 
                     #Gibt es auf den Substate einen Gewinner und wenn ja, wer ist es?
@@ -95,7 +106,7 @@ class PlayerReenforcement(PlayerInterface):
                         #Der anderen Spieler hat gewonnen
                         initialValue = self.loseValue
 
-                    newSubStates.append((newSubGrid, initialValue, subSubStates))
+                    newSubStates.append([newSubGrid, initialValue, subSubStates])
         return newSubStates
 
 

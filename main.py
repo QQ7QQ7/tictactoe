@@ -15,7 +15,9 @@ def init():
 
     return playGrid
 
-
+#TODO's: Loop zum Trainieren einbauen,
+# Step-Size Parameter korrekt setzen und verändern,
+# Trainierte States in Datei schreiben
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     playGrid = init()
