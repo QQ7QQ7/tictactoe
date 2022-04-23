@@ -15,35 +15,49 @@ def init():
 
     return playGrid
 
-#TODO's: Loop zum Trainieren einbauen,
+
+# TODO's:
+# Loop zum Trainieren einbauen, DONE
 # Step-Size Parameter korrekt setzen und verändern,
-# Trainierte States in Datei schreiben
+# Trainierte States in Datei schreiben, DONE
+# UpdateScore muss noch für eine weitere Ebene gemacht werden DONE
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    playGrid = init()
-    player1 = PlayerReenforcement()
-    player2 = PlayerMinMax()
-    endGame = False
-    playGrid.prettyPrint()
+    numOfIterations = 1000
 
-    while not endGame:
-        print("Spieler 'X' ist dran")
-        x, y = player1.makeMove(playGrid)
-        playGrid.updateScore('X', x, y)
+    for x in range(numOfIterations):
+        playGrid = init()
+        player1 = PlayerReenforcement()
+        player2 = PlayerMinMax()
+        endGame = False
         playGrid.prettyPrint()
-        print()
-        endGame, winner = playGrid.isGameFinished()
-        if endGame:
-            break
 
-        print("Spieler 'O' ist dran")
-        x, y = player2.makeMove(playGrid)
-        playGrid.updateScore('O', x, y)
-        playGrid.prettyPrint()
-        print()
-        endGame, winner = playGrid.isGameFinished()
+        while not endGame:
+            print("Spieler 'X' ist dran")
+            x, y = player1.makeMove(playGrid)
+            playGrid.updateScore('X', x, y)
+            playGrid.prettyPrint()
+            if isinstance(player1, PlayerReenforcement):
+                player1.updateScoreAndLastMove(playGrid)
+            print()
+            endGame, winner = playGrid.isGameFinished()
+            if endGame:
+                break
 
-    if winner is None:
-        print("Das Spiel ist unentschieden!")
-    else:
-        print("Der Gewinner ist ", winner + "!")
+            print("Spieler 'O' ist dran")
+            x, y = player2.makeMove(playGrid)
+            playGrid.updateScore('O', x, y)
+            playGrid.prettyPrint()
+            if isinstance(player1, PlayerReenforcement):
+                player1.updateScoreAndLastMove(playGrid)
+            print()
+            endGame, winner = playGrid.isGameFinished()
+
+        if winner is None:
+            print("Das Spiel ist unentschieden!")
+        else:
+            print("Der Gewinner ist ", winner + "!")
+
+        if isinstance(player1, PlayerReenforcement):
+            player1.saveStates()

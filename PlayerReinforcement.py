@@ -12,44 +12,52 @@ class PlayerReenforcement(PlayerInterface):
     states = None
     lastState = None
     stateFileName = 'states'
-    explorationProbability = 0.2
-    stepSizeParameter = 0.1
+    explorationProbability = 0.3
+    stepSizeParameter = 0.15
+    training = True
+
+    def __init__(self):
+        if exists(self.stateFileName):
+            with open(self.stateFileName, 'rb') as config_dictionary_file:
+                self.states = pickle.load(config_dictionary_file)
+
+    def saveStates(self):
+        with open(self.stateFileName, 'wb') as config_dictionary_file:
+            pickle.dump(self.states, config_dictionary_file)
+
 
     def makeMove(self, playGrid):
         if self.states is None:
-            if exists(self.stateFileName):
-                # Step 2
-                with open(self.stateFileName, 'rb') as config_dictionary_file:
-                    # Step 3
-                    self.states = pickle.load(config_dictionary_file)
-            else:
-                self.createStates(playGrid)
-                # Step 2
-                with open(self.stateFileName, 'wb') as config_dictionary_file:
-                    # Step 3
-                    pickle.dump(self.states, config_dictionary_file)
+            #Wurde keine Datei geladen, somit wird die Struktur aufgrund des aktuellen PlayGrids angelegt
+            self.createStates(playGrid)
+
+        if self.lastState is None:
             #Aktuellen Zustand in States finden
             self.lastState = [item for item in self.states if item[0] == playGrid][0]
-        else:
-            self.updateScore(playGrid)
+        #else:
+            #self.updateScore(playGrid)
             #Last State aktualisieren, da ja der Gegner den letzten Zug gemacht hat
-            self.lastState = [item for item in self.lastState[2] if item[0] == playGrid][0]
+            #self.lastState = [item for item in self.lastState[2] if item[0] == playGrid][0]
 
-        if random.random() <= self.explorationProbability:
+        if self.training and random.random() <= self.explorationProbability:
             #Explore
-            self.lastState = self.determinExplorationMove()
+            nextMove = self.determinExplorationMove()
         else:
             #Greedy
-            self.lastState = self.determinGreedyMove()
+            nextMove = self.determinGreedyMove()
 
-        return self.getIndexOfDifference(playGrid, self.lastState[0])
+        #self.updateScoreAndLastMove(nextMove[0])
+        #self.lastState = nextMove
+        return self.getIndexOfDifference(playGrid, nextMove[0])
 
-    def updateScore(self, playGrid):
+    def updateScoreAndLastMove(self, playGrid):
         playGridState = [item for item in self.lastState[2] if item[0] == playGrid][0]
         playGridStateValue = playGridState[1]
         currentStateValue = self.lastState[1]
         newStateValue = currentStateValue + self.stepSizeParameter * (playGridStateValue - currentStateValue)
+        print("Value von ", currentStateValue, " auf ", newStateValue, " gesetzt.")
         self.lastState[1] = newStateValue
+        self.lastState = playGridState
 
 
     def getIndexOfDifference(self, gridBeforeMove, gridAfterMove):
